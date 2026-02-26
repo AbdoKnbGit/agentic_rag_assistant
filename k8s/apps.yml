@@ -1,0 +1,211 @@
+# ═══════════════════════════════════════════════════════
+# k8s/apps.yml — Application: Backend, Frontend, Admin, Celery
+# ═══════════════════════════════════════════════════════
+
+# ── Backend (FastAPI + LangGraph) ─────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rag-backend
+  namespace: rag-saas
+  labels:
+    app: rag-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rag-backend
+  template:
+    metadata:
+      labels:
+        app: rag-backend
+    spec:
+      containers:
+        - name: rag-backend
+          image: rag-backend:latest
+          imagePullPolicy: Never    # minikube: use local images
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: rag-config
+            - secretRef:
+                name: rag-secrets
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "2Gi"
+              cpu: "1"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: rag-saas
+spec:
+  selector:
+    app: rag-backend
+  ports:
+    - port: 8000
+      targetPort: 8000
+  type: ClusterIP
+
+---
+# ── Frontend (React + Nginx) ─────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rag-frontend
+  namespace: rag-saas
+  labels:
+    app: rag-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rag-frontend
+  template:
+    metadata:
+      labels:
+        app: rag-frontend
+    spec:
+      containers:
+        - name: rag-frontend
+          image: rag-frontend:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3001
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3001
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "256Mi"
+              cpu: "250m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: rag-saas
+spec:
+  selector:
+    app: rag-frontend
+  ports:
+    - port: 3001
+      targetPort: 3001
+  type: NodePort       # Accessible from outside the cluster
+
+---
+# ── Admin Panel (Streamlit) ──────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rag-admin
+  namespace: rag-saas
+  labels:
+    app: rag-admin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rag-admin
+  template:
+    metadata:
+      labels:
+        app: rag-admin
+    spec:
+      containers:
+        - name: rag-admin
+          image: rag-admin:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8502
+          env:
+            - name: BACKEND_URL
+              value: "http://backend:8000"
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: admin-service
+  namespace: rag-saas
+spec:
+  selector:
+    app: rag-admin
+  ports:
+    - port: 8502
+      targetPort: 8502
+  type: NodePort
+
+---
+# ── Celery Worker (Async RAG) ────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rag-celery-worker
+  namespace: rag-saas
+  labels:
+    app: rag-celery-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rag-celery-worker
+  template:
+    metadata:
+      labels:
+        app: rag-celery-worker
+    spec:
+      containers:
+        - name: celery-worker
+          image: rag-backend:latest       # Same image as backend
+          imagePullPolicy: Never
+          command:
+            - celery
+            - -A
+            - backend.celery_app
+            - worker
+            - --loglevel=info
+            - --concurrency=2
+            - -Q
+            - celery,priority
+          envFrom:
+            - configMapRef:
+                name: rag-config
+            - secretRef:
+                name: rag-secrets
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "2Gi"
+              cpu: "1"

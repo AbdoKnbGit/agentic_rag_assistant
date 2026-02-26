@@ -1,0 +1,16 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Only frontend deps (lighter)
+RUN pip install --no-cache-dir streamlit requests
+
+COPY . .
+
+EXPOSE 8502
+
+CMD ["streamlit", "run", "frontend/admin_panel/admin.py", "--server.port", "8502", "--server.address", "0.0.0.0"]

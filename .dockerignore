@@ -1,0 +1,35 @@
+# Git
+.git
+.gitignore
+
+# Environments
+.env
+.env.*
+!.env.example
+
+# Python Dependencies & Cache
+**/__pycache__/
+**/*.py[cod]
+**/*.pyo
+**/*.pyd
+**/.pytest_cache/
+**/venv/
+**/.venv/
+
+# Node / React Dependencies & Build
+**/node_modules/
+**/dist/
+**/build/
+
+# Local Data Volumes
+**/qdrant_data/
+**/redis_data/
+**/mongo_data/
+
+# App Specific
+uploads/
+*.log
+*.pdf
+*.docx
+*.csv
+*.parquet

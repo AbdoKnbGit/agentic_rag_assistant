@@ -1,0 +1,39 @@
+# ═══════════════════════════════════════════════════════
+# k8s/secrets.yml — Sensitive configuration
+# ⚠️ Replace placeholder values before applying!
+# ═══════════════════════════════════════════════════════
+apiVersion: v1
+kind: Secret
+metadata:
+  name: rag-secrets
+  namespace: rag-saas
+type: Opaque
+stringData:
+  NVIDIA_API_KEY: "YOUR_Nvedia_api_key"
+---
+# ═══════════════════════════════════════════════════════
+# k8s/configmap.yml — Non-sensitive configuration
+# ═══════════════════════════════════════════════════════
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rag-config
+  namespace: rag-saas
+data:
+  LLM_MODEL: "qwen/qwen3-235b-a22b"
+  EMBED_MODEL: "BAAI/bge-small-en-v1.5"
+  QDRANT_HOST: "qdrant-service"
+  QDRANT_PORT: "6333"
+  QDRANT_COLLECTION: "rag_docs"
+  BACKEND_HOST: "0.0.0.0"
+  BACKEND_PORT: "8000"
+  DEBUG: "false"
+  CHUNK_SIZE: "600"
+  CHUNK_OVERLAP: "100"
+  TOP_K: "6"
+  UPLOAD_DIR: "./uploads"
+  MAX_FILE_SIZE_MB: "50"
+  REDIS_URL: "redis://redis-service:6379/0"
+  CACHE_TTL: "3600"
+  MONGODB_URL: "mongodb://mongodb-service:27017/rag_saas"
+  CELERY_BROKER_URL: "redis://redis-service:6379/1"

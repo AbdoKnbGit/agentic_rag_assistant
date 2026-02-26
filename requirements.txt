@@ -1,0 +1,66 @@
+# ═══════════════════════════════════════════════════════
+#  Agentic RAG SaaS — requirements.txt
+#  Install: pip install -r requirements.txt
+# ═══════════════════════════════════════════════════════
+
+# ── API & Web ────────────────────────────────────────────
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+python-multipart>=0.0.9      # file uploads
+httpx>=0.27.0
+
+# ── LangChain core ───────────────────────────────────────
+langchain>=0.2.0
+langchain-openai>=0.1.8
+langchain-community>=0.2.0
+langchain-core>=0.2.0
+langchain-text-splitters>=0.2.0
+langgraph>=0.1.0              # Agentic graph
+
+# ── LLM backends ─────────────────────────────────────────
+openai>=1.30.0
+                     # Local Llama3
+langchain-nvidia-ai-endpoints>=0.3.0
+
+# ── Vector DB ────────────────────────────────────────────
+qdrant-client==1.12.0
+fastembed==0.3.4               # Fast local embeddings (no API needed)
+
+# ── Hybrid search ────────────────────────────────────────
+rank-bm25>=0.2.2
+
+# ── Document parsing ─────────────────────────────────────
+pymupdf>=1.24.0                # PDF
+docx2txt>=0.8                  # Word
+unstructured>=0.14.0           # Fallback (txt, html, etc.)
+python-magic>=0.4.27           # MIME detection
+
+# ── Data analysis ────────────────────────────────────────
+pandas>=2.2.0
+pyarrow>=16.0.0                # Parquet
+numpy==1.26.4
+
+# ── Frontend ─────────────────────────────────────────────
+streamlit>=1.35.0
+streamlit-chat>=0.1.1
+
+# ── Monitoring ───────────────────────────────────────────
+prometheus-client>=0.20.0
+structlog>=24.1.0
+
+# ── Utilities ────────────────────────────────────────────
+pydantic>=2.7.0
+pydantic-settings>=2.2.0
+python-dotenv>=1.0.1
+aiofiles>=23.2.1
+tenacity>=8.3.0                # Retry logic
+
+# ── Redis Cache ──────────────────────────────────────────
+redis>=5.0.0
+
+# ── MongoDB ──────────────────────────────────────────────
+pymongo>=4.7.0
+motor>=3.4.0                   # Async MongoDB driver
+
+# ── Celery ───────────────────────────────────────────────
+celery>=5.4.0

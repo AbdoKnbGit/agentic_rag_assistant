@@ -1,0 +1,9 @@
+# ═══════════════════════════════════════════════════════
+# k8s/namespace.yml — Isolate all RAG resources
+# ═══════════════════════════════════════════════════════
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rag-saas
+  labels:
+    app.kubernetes.io/part-of: agentic-rag-saas
